@@ -13,34 +13,3 @@ remotecfg {
     stack       = "pos-demo",
   }
 }
-
-otelcol.receiver.otlp "ingest" {
-  grpc {
-    endpoint = "0.0.0.0:4317"
-  }
-
-  http {
-    endpoint = "0.0.0.0:4318"
-  }
-
-  output {
-    traces  = [otelcol.processor.batch.main.input]
-    metrics = [otelcol.processor.batch.main.input]
-  }
-}
-
-otelcol.processor.batch "main" {
-  output {
-    traces  = [otelcol.exporter.otlphttp.grafana_cloud.input]
-    metrics = [otelcol.exporter.otlphttp.grafana_cloud.input]
-  }
-}
-
-otelcol.exporter.otlphttp "grafana_cloud" {
-  client {
-    endpoint = sys.env("GRAFANA_CLOUD_OTLP_ENDPOINT")
-    headers = {
-      "Authorization" = sys.env("GRAFANA_CLOUD_OTLP_AUTH_HEADER"),
-    }
-  }
-}
