@@ -43,10 +43,33 @@ Available variables:
 - `MONGODB_URI`
 - `MONGODB_COLLECTION`
 - `TRANSACTION_LOG_FILE`
+- `DEPLOYMENT_ENV`
+- `SERVICE_VERSION`
+- `GRAFANA_CLOUD_OTLP_ENDPOINT`
+- `GRAFANA_CLOUD_OTLP_AUTH_HEADER`
+- `GCLOUD_FM_URL`
+- `GCLOUD_FM_POLL_FREQUENCY`
+- `GCLOUD_FM_HOSTED_ID`
+- `GCLOUD_RW_API_KEY`
+
+Variable descriptions:
+- `APP_PORT`: HTTP port exposed by the Spring Boot app.
+- `MONGODB_URI`: MongoDB connection string used by the app.
+- `MONGODB_COLLECTION`: MongoDB collection for transaction log documents.
+- `TRANSACTION_LOG_FILE`: Dedicated local logfile path for transaction entries.
+- `DEPLOYMENT_ENV`: Environment label attached to telemetry resource attributes.
+- `SERVICE_VERSION`: Service version label attached to telemetry resource attributes.
+- `GRAFANA_CLOUD_OTLP_ENDPOINT`: Grafana Cloud OTLP gateway URL for Alloy export.
+- `GRAFANA_CLOUD_OTLP_AUTH_HEADER`: Authorization header for OTLP export in the format `Basic <base64(instance_id:api_token)>`.
+- `GCLOUD_FM_URL`: Grafana Fleet Management API URL used by Alloy `remotecfg`.
+- `GCLOUD_FM_POLL_FREQUENCY`: Poll interval Alloy uses to fetch remote config.
+- `GCLOUD_FM_HOSTED_ID`: Hosted ID used as Alloy collector identity.
+- `GCLOUD_RW_API_KEY`: API key used by Alloy `remotecfg` basic auth.
 
 Notes:
 - For Docker Compose, `MONGODB_URI` should typically use the service hostname (`mongo`), for example `mongodb://mongo:27017/pos_demo`.
 - For local non-container run, `MONGODB_URI` is usually `mongodb://localhost:27017/pos_demo`.
+- Fleet Management variables are optional unless you want Alloy remote configuration.
 
 ## Bring Up the Full Stack (Recommended)
 From the project root, run:

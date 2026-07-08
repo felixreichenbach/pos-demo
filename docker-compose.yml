@@ -8,6 +8,26 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  alloy:
+    image: grafana/alloy:latest
+    container_name: pos-demo-alloy
+    restart: unless-stopped
+    command:
+      - run
+      - /etc/alloy
+    environment:
+      GRAFANA_CLOUD_OTLP_ENDPOINT: ${GRAFANA_CLOUD_OTLP_ENDPOINT}
+      GRAFANA_CLOUD_OTLP_AUTH_HEADER: ${GRAFANA_CLOUD_OTLP_AUTH_HEADER}
+      GCLOUD_FM_URL: ${GCLOUD_FM_URL}
+      GCLOUD_FM_POLL_FREQUENCY: ${GCLOUD_FM_POLL_FREQUENCY}
+      GCLOUD_FM_HOSTED_ID: ${GCLOUD_FM_HOSTED_ID}
+      GCLOUD_RW_API_KEY: ${GCLOUD_RW_API_KEY}
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy:ro
+
   pos-app:
     build:
       context: .
@@ -15,11 +35,19 @@ services:
     container_name: pos-demo-app
     depends_on:
       - mongo
+      - alloy
     environment:
       APP_PORT: 8080
       MONGODB_URI: mongodb://mongo:27017/pos_demo
       MONGODB_COLLECTION: transaction_logs
       TRANSACTION_LOG_FILE: /var/log/pos/transactions.log
+      OTEL_SERVICE_NAME: pos-demo-app
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.namespace=pos-demo,deployment.environment=${DEPLOYMENT_ENV:-dev},service.version=${SERVICE_VERSION:-0.0.1}
     ports:
       - "8080:8080"
     volumes:
