@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -134,6 +135,8 @@ class TransactionApiIntegrationTest {
 
         verify(transactionLogRepository, times(1)).save(any(Transaction.class));
         verify(transactionFileLogger, never()).appendTransactionExecuted(any(Transaction.class));
+        verify(transactionFileLogger, times(1))
+          .appendTransactionFailed(any(Transaction.class), eq("database unavailable"));
     }
 
       @Test

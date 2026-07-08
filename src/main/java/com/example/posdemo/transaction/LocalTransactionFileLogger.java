@@ -23,13 +23,33 @@ public class LocalTransactionFileLogger implements TransactionFileLogger {
     @Override
     public void appendTransactionExecuted(Transaction transaction) {
         String line = String.format(
-                "timestamp=%s status=WRITTEN eventType=TRANSACTION_EXECUTED transactionId=%s cashierId=%s totalAmount=%s paymentMethod=%s%n",
+                "timestamp=%s status=SUCCESS eventType=TRANSACTION_EXECUTED transactionId=%s cashierId=%s totalAmount=%s paymentMethod=%s%n",
                 transaction.timestamp(),
                 transaction.transactionId(),
                 transaction.cashierId(),
                 transaction.totalAmount(),
                 transaction.paymentMethod()
         );
+
+        appendLine(line);
+    }
+
+    @Override
+    public void appendTransactionFailed(Transaction transaction, String errorDetail) {
+        String line = String.format(
+                "timestamp=%s status=FAILED eventType=TRANSACTION_EXECUTED transactionId=%s cashierId=%s totalAmount=%s paymentMethod=%s error=%s%n",
+                transaction.timestamp(),
+                transaction.transactionId(),
+                transaction.cashierId(),
+                transaction.totalAmount(),
+                transaction.paymentMethod(),
+                errorDetail
+        );
+
+        appendLine(line);
+    }
+
+    private void appendLine(String line) {
 
         try {
             Path parent = transactionLogPath.getParent();

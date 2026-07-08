@@ -56,9 +56,10 @@ Out of scope:
 - The system should provide a simple way to verify stored logs (e.g., endpoint, admin view, or direct DB query instructions for demo).
 
 ### 4.5 Logging to Dedicated Local File
-- In addition to MongoDB persistence, the application shall write each successful transaction event to a dedicated logfile on the POS application system.
+- In addition to MongoDB persistence, the application shall write each transaction attempt (successful or failed) to a dedicated logfile on the POS application system.
 - The dedicated logfile shall be separate from general application logs.
-- Each logfile entry shall include at minimum transaction ID, timestamp, cashier/user identifier, total amount, payment method, and logging status.
+- Each logfile entry shall include at minimum transaction ID, timestamp, cashier/user identifier, total amount, payment method, and logging status (`SUCCESS` or `FAILED`).
+- For failed transactions, each logfile entry shall also include a failure reason/error detail.
 - The application shall append new entries without overwriting existing logfile content.
 
 ## 5. Non-Functional Requirements
@@ -113,6 +114,7 @@ Out of scope:
 - System automatically calculates total amount from line items (`sum(quantity * unit price)`) without manual total entry.
 - System writes exactly one corresponding transaction log entry to MongoDB.
 - System writes a corresponding transaction entry to the dedicated local transaction logfile.
+- System writes a transaction entry to the dedicated local transaction logfile for both successful and failed transaction attempts.
 - User can verify persisted log entry content in MongoDB.
 - User can verify transaction logfile entries on the POS application system.
 - If MongoDB is unavailable, UI reports transaction logging failure appropriately.

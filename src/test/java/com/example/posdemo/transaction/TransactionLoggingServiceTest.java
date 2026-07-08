@@ -3,9 +3,9 @@ package com.example.posdemo.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
@@ -42,7 +42,7 @@ class TransactionLoggingServiceTest {
     }
 
     @Test
-    void throwsAndSkipsFileLoggingWhenDatabaseWriteFails() {
+    void throwsAndLogsFailedTransactionWhenDatabaseWriteFails() {
         doThrow(new RuntimeException("database unavailable"))
                 .when(transactionLogRepository)
                 .save(any(Transaction.class));
@@ -55,7 +55,7 @@ class TransactionLoggingServiceTest {
         );
 
         assertEquals("database unavailable", exception.getMessage());
-        verify(transactionFileLogger, never()).appendTransactionExecuted(any(Transaction.class));
+        verify(transactionFileLogger).appendTransactionFailed(eq(transaction), eq("database unavailable"));
     }
 
     private Transaction sampleTransaction() {

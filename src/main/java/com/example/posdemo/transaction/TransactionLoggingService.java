@@ -17,7 +17,19 @@ public class TransactionLoggingService {
     }
 
     public void logExecutedTransaction(Transaction transaction) {
-        transactionLogRepository.save(transaction);
-        transactionFileLogger.appendTransactionExecuted(transaction);
+        try {
+            transactionLogRepository.save(transaction);
+            transactionFileLogger.appendTransactionExecuted(transaction);
+        } catch (RuntimeException exception) {
+            String errorDetail = exception.getMessage() == null ? "Unknown error" : exception.getMessage();
+
+            try {
+                transactionFileLogger.appendTransactionFailed(transaction, errorDetail);
+            } catch (RuntimeException fileLoggingException) {
+                exception.addSuppressed(fileLoggingException);
+            }
+
+            throw exception;
+        }
     }
 }
