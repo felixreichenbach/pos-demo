@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: pos-demo-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  pos-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pos-demo-app
+    depends_on:
+      - mongo
+    environment:
+      APP_PORT: 8080
+      MONGODB_URI: mongodb://mongo:27017/pos_demo
+      MONGODB_COLLECTION: transaction_logs
+      TRANSACTION_LOG_FILE: /var/log/pos/transactions.log
+    ports:
+      - "8080:8080"
+    volumes:
+      - pos_logs:/var/log/pos
+
+volumes:
+  mongo_data:
+  pos_logs:

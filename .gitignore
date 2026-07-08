@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Java / Maven
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven build output
+/target/
+
+# Spring Boot runtime files
+*.log
+logs/
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+
+# OS/editor temp files
+*.swp
+*.swo
+*~
+
+# Coverage and test reports
+coverage/
+.junit/

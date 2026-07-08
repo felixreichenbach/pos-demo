@@ -1,0 +1,13 @@
+server:
+  port: ${APP_PORT:8080}
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/pos_demo}
+
+pos:
+  mongodb:
+    collection: ${MONGODB_COLLECTION:transaction_logs}
+  logging:
+    transaction-log-file: ${TRANSACTION_LOG_FILE:./logs/transactions.log}

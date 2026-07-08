@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7efe1;
+      --panel: rgba(255, 255, 255, 0.86);
+      --ink: #1d2a2a;
+      --muted: #4f5f5f;
+      --accent: #0d8f78;
+      --accent-strong: #0a6f5d;
+      --warn: #9f3c24;
+      --ok: #185f2d;
+      --ring: rgba(13, 143, 120, 0.28);
+      --shadow: 0 18px 40px rgba(23, 39, 44, 0.14);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 5%, rgba(255, 255, 255, 0.95), transparent 40%),
+        radial-gradient(circle at 90% 10%, rgba(255, 201, 127, 0.32), transparent 50%),
+        radial-gradient(circle at 12% 90%, rgba(94, 185, 152, 0.35), transparent 48%),
+        linear-gradient(140deg, #fff6e8, #f8e7cc 45%, #e7f2ee);
+      display: grid;
+      place-items: center;
+      padding: 1.25rem;
+    }
+
+    .layout {
+      width: min(1120px, 100%);
+      display: grid;
+      grid-template-columns: minmax(380px, 1fr) minmax(500px, 1.08fr);
+      gap: 1.2rem;
+      animation: rise 420ms ease-out;
+    }
+
+    .panel {
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(20, 35, 35, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .hero {
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(13, 143, 120, 0.12);
+      color: var(--accent-strong);
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 2vw + 1rem, 2.7rem);
+      margin: 0.7rem 0 0.4rem;
+      line-height: 1.04;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 28ch;
+      line-height: 1.45;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      right: -20px;
+      bottom: -20px;
+      border-radius: 35% 65% 70% 30% / 39% 33% 67% 61%;
+      background: linear-gradient(135deg, rgba(13, 143, 120, 0.15), rgba(255, 137, 78, 0.16));
+      z-index: -1;
+      animation: drift 7s ease-in-out infinite;
+    }
+
+    .status-strip {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      font-size: 0.93rem;
+      border: 1px dashed rgba(29, 42, 42, 0.2);
+      background: rgba(255, 255, 255, 0.65);
+      min-height: 3rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .status-strip.ok {
+      border-color: rgba(24, 95, 45, 0.35);
+      background: rgba(24, 95, 45, 0.08);
+      color: var(--ok);
+    }
+
+    .status-strip.error {
+      border-color: rgba(159, 60, 36, 0.4);
+      background: rgba(159, 60, 36, 0.08);
+      color: var(--warn);
+    }
+
+    form {
+      padding: 1.4rem;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    input,
+    select,
+    button {
+      font-family: inherit;
+      font-size: 0.98rem;
+    }
+
+    input,
+    select {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      border: 1px solid rgba(29, 42, 42, 0.2);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      outline: none;
+      transition: border-color 120ms, box-shadow 120ms;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .grid-2 > * {
+      min-width: 0;
+    }
+
+    .item-row {
+      padding: 0.85rem;
+      border: 1px solid rgba(29, 42, 42, 0.15);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.74);
+      animation: fadeSlide 300ms ease;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .item-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .btn-text {
+      background: transparent;
+      border: 0;
+      color: var(--warn);
+      cursor: pointer;
+      font-size: 0.86rem;
+      font-weight: 700;
+      padding: 0;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 11px;
+      cursor: pointer;
+      padding: 0.7rem 1rem;
+      font-weight: 700;
+      transition: transform 100ms ease, filter 120ms ease;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background: rgba(29, 42, 42, 0.08);
+      color: var(--ink);
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, var(--accent), #18ab8f);
+      color: #ffffff;
+    }
+
+    .btn:hover {
+      filter: brightness(0.97);
+    }
+
+    .receipt {
+      padding: 1rem 1.2rem 1.25rem;
+      border-top: 1px solid rgba(29, 42, 42, 0.1);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .receipt h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .mono {
+      margin-top: 0.6rem;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.86rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 5.5rem;
+      background: rgba(250, 250, 250, 0.9);
+      border: 1px solid rgba(29, 42, 42, 0.12);
+      border-radius: 10px;
+      padding: 0.8rem;
+    }
+
+    .total-preview {
+      margin-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    .total-display {
+      width: 100%;
+      border: 1px solid rgba(29, 42, 42, 0.2);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      font-family: "IBM Plex Mono", monospace;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero p {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateX(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes drift {
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-8px) rotate(8deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <section class="panel hero">
+      <span class="tag">POS Demo</span>
+      <h1>Fast Checkout Log Flow</h1>
+      <p>Submit a transaction from the UI and track immediate logging feedback from the backend.</p>
+      <div id="status" class="status-strip">Waiting for transaction submission.</div>
+    </section>
+
+    <section class="panel">
+      <form id="transaction-form" novalidate>
+        <div class="grid-2">
+          <div class="field">
+            <label for="cashierId">Cashier ID</label>
+            <input id="cashierId" name="cashierId" required placeholder="cashier-01" value="cashier-01">
+          </div>
+
+          <div class="field">
+            <label for="paymentMethod">Payment Method</label>
+            <select id="paymentMethod" name="paymentMethod" required>
+              <option value="CARD">CARD</option>
+              <option value="CASH">CASH</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="items"></div>
+
+        <div class="btn-row">
+          <button id="add-item" class="btn btn-secondary" type="button">Add Item</button>
+          <button class="btn btn-primary" type="submit">Submit Transaction</button>
+        </div>
+
+        <div class="field">
+          <label for="totalAmountDisplay">Total Amount (Auto-Calculated)</label>
+          <div id="totalAmountDisplay" class="total-display">0.00</div>
+          <div id="calculatedTotal" class="total-preview">Calculated from items: 0.00</div>
+        </div>
+      </form>
+
+      <div class="receipt">
+        <h2>Last API Result</h2>
+        <pre id="result" class="mono">No transaction sent yet.</pre>
+      </div>
+    </section>
+  </main>
+
+  <template id="item-template">
+    <article class="item-row">
+      <div class="item-top">
+        <span class="item-title">Line Item</span>
+        <button type="button" class="btn-text">Remove</button>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Product Name</label>
+          <input name="productName" required placeholder="Coffee">
+        </div>
+        <div class="field">
+          <label>Quantity</label>
+          <input name="quantity" type="number" min="1" step="1" required value="1">
+        </div>
+        <div class="field">
+          <label>Unit Price</label>
+          <input name="unitPrice" type="number" min="0.01" step="0.01" required value="3.50">
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const form = document.getElementById("transaction-form");
+    const itemsContainer = document.getElementById("items");
+    const itemTemplate = document.getElementById("item-template");
+    const addItemButton = document.getElementById("add-item");
+    const statusBox = document.getElementById("status");
+    const resultBox = document.getElementById("result");
+    const totalAmountDisplay = document.getElementById("totalAmountDisplay");
+    const calculatedTotalView = document.getElementById("calculatedTotal");
+
+    function toMoney(value) {
+      return Number(value || 0).toFixed(2);
+    }
+
+    function calculateTotal() {
+      const rows = Array.from(itemsContainer.querySelectorAll(".item-row"));
+      const total = rows.reduce((sum, row) => {
+        const quantity = Number(row.querySelector("input[name='quantity']").value || 0);
+        const unitPrice = Number(row.querySelector("input[name='unitPrice']").value || 0);
+        return sum + quantity * unitPrice;
+      }, 0);
+
+      const formattedTotal = toMoney(total);
+      totalAmountDisplay.textContent = formattedTotal;
+      calculatedTotalView.textContent = `Calculated from items: ${formattedTotal}`;
+      return total;
+    }
+
+    function addItem(defaults = {}) {
+      const fragment = itemTemplate.content.cloneNode(true);
+      const row = fragment.querySelector(".item-row");
+
+      row.querySelector("input[name='productName']").value = defaults.productName || "Coffee";
+      row.querySelector("input[name='quantity']").value = defaults.quantity || 1;
+      row.querySelector("input[name='unitPrice']").value = defaults.unitPrice || "3.50";
+
+      const removeButton = row.querySelector(".btn-text");
+      removeButton.addEventListener("click", () => {
+        row.remove();
+        if (!itemsContainer.querySelector(".item-row")) {
+          addItem();
+        }
+        calculateTotal();
+      });
+
+      row.addEventListener("input", () => {
+        calculateTotal();
+      });
+
+      itemsContainer.appendChild(row);
+      calculateTotal();
+    }
+
+    function setStatus(message, type) {
+      statusBox.classList.remove("ok", "error");
+      if (type) {
+        statusBox.classList.add(type);
+      }
+      statusBox.textContent = message;
+    }
+
+    addItemButton.addEventListener("click", () => {
+      addItem({ productName: "Snack", quantity: 1, unitPrice: "2.00" });
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) {
+        setStatus("Please complete all required fields.", "error");
+        return;
+      }
+
+      const itemRows = Array.from(itemsContainer.querySelectorAll(".item-row"));
+      const items = itemRows.map((row) => {
+        const quantity = Number(row.querySelector("input[name='quantity']").value);
+        const unitPrice = Number(row.querySelector("input[name='unitPrice']").value);
+        return {
+          productName: row.querySelector("input[name='productName']").value.trim(),
+          quantity,
+          unitPrice: Number(unitPrice.toFixed(2))
+        };
+      });
+
+      const payload = {
+        cashierId: form.cashierId.value.trim(),
+        items,
+        paymentMethod: form.paymentMethod.value
+      };
+
+      setStatus("Submitting transaction...", null);
+
+      try {
+        const response = await fetch("/api/transactions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          const errorMessage = data.error || `Request failed with status ${response.status}`;
+          setStatus(`Transaction failed: ${errorMessage}`, "error");
+          resultBox.textContent = JSON.stringify(data, null, 2);
+          return;
+        }
+
+        setStatus("Transaction logged to database and dedicated logfile.", "ok");
+        resultBox.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        setStatus("Network or server error while sending transaction.", "error");
+        resultBox.textContent = error instanceof Error ? error.message : String(error);
+      }
+    });
+
+    addItem({ productName: "Coffee", quantity: 2, unitPrice: "3.50" });
+    calculateTotal();
+  </script>
+</body>
+</html>
