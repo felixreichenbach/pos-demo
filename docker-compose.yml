@@ -57,6 +57,23 @@ services:
     volumes:
       - pos_logs:/var/log/pos
 
+  load-generator:
+    build:
+      context: .
+      dockerfile: tools/load-generator/Dockerfile
+    container_name: pos-demo-load-generator
+    depends_on:
+      - pos-app
+    command:
+      - "--url"
+      - "http://pos-app:8080/api/transactions"
+      - "--min-tpm"
+      - "10"
+      - "--max-tpm"
+      - "120"
+    profiles:
+      - load
+
 volumes:
   mongo_data:
   pos_logs:

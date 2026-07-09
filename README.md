@@ -126,6 +126,91 @@ Expected success response:
 - HTTP `201 Created`
 - JSON with `transactionId`, `timestamp`, and `status: "LOGGED"`
 
+### Option C: Run the Load Generator
+Use the provided script to submit randomized checkout transactions continuously.
+
+It generates:
+- cashier IDs between `cashier-01` and `cashier-10`
+- payment methods `CARD` or `CASH`
+- random line items with realistic grocery-style product names
+- random quantities per item (`1` to `5`)
+- realistic unit prices per product
+
+Default throughput varies randomly between `10` and `120` transactions per minute.
+
+Run indefinitely until interrupted:
+
+```bash
+python3 tools/load-generator/generate_transactions.py
+```
+
+Run for 5 minutes:
+
+```bash
+python3 tools/load-generator/generate_transactions.py --duration-seconds 300
+```
+
+Override throughput range or target URL:
+
+```bash
+python3 tools/load-generator/generate_transactions.py \
+  --url http://localhost:8080/api/transactions \
+  --min-tpm 20 \
+  --max-tpm 80
+```
+
+### Option D: Run the Load Generator in Docker
+The load generator is also available as a container image.
+
+Quick start (app stack + continuous load):
+
+```bash
+docker compose --profile load up --build
+```
+
+This starts the regular stack and an additional `load-generator` service that targets `http://pos-app:8080/api/transactions` internally.
+
+Start app stack first, then start load generator (recommended for iterative testing):
+
+```bash
+docker compose up -d mongo alloy pos-app
+docker compose --profile load up -d load-generator
+```
+
+Run only the generator service in the foreground after the app stack is already up:
+
+```bash
+docker compose --profile load up --build load-generator
+```
+
+Run a one-off load test with custom rate and duration:
+
+```bash
+docker compose run --rm load-generator \
+  --url http://pos-app:8080/api/transactions \
+  --min-tpm 30 \
+  --max-tpm 90 \
+  --duration-seconds 300
+```
+
+View generator logs:
+
+```bash
+docker compose logs -f load-generator
+```
+
+Stop generator only:
+
+```bash
+docker compose stop load-generator
+```
+
+Stop everything:
+
+```bash
+docker compose down --remove-orphans
+```
+
 ## Verify Transaction Logging
 
 ### 1. Verify MongoDB Log Entry
